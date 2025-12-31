@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Happy New Year 2026</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: black;
+  overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+canvas { display: block; }
+
+.container {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  text-align: center;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.word {
+  display: none;
+  font-size: 3.5em;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: white;
+  text-shadow: 0 0 20px gold, 0 0 40px orange;
+  animation: pop 1.5s ease forwards, glow 2s infinite alternate;
+}
+
+.year {
+  font-size: 4.8em;
+  color: #ffd700;
+}
+
+.by {
+  display: none;
+  position: absolute;
+  bottom: 12%;
+  width: 100%;
+  text-align: center;
+  font-size: 1.6em;
+  color: #ffcc00;
+  animation: floatUp 4s ease-in-out infinite;
+}
+
+.tap {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  color: #ccc;
+  font-size: 0.9em;
+  opacity: 0.7;
+}
+
+@keyframes pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px gold, 0 0 20px orange; }
+  to { text-shadow: 0 0 30px gold, 0 0 60px red; }
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-18px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 0.6; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div id="happy" class="word">Happy</div>
+  <div id="new" class="word">New</div>
+  <div id="year" class="word">Year</div>
+  <div id="y2026" class="word year">2026</div>
+</div>
+
+<div id="byYoha" class="by">✨ by Yoha ✨</div>
+
+<div class="tap">🔊 Toca la pantalla para iniciar la música</div>
+
+<canvas id="canvas"></canvas>
+
+<!-- 🎵 Música de Año Nuevo (libre de derechos) -->
+<audio id="music" loop>
+  <source src="https://cdn.pixabay.com/audio/2023/12/30/audio_6a7a3c9c62.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* ================= FIREWORKS ================= */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const fireworks = [];
+const particles = [];
+
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+class Firework {
+  constructor() {
+    this.x = random(0, canvas.width);
+    this.y = canvas.height;
+    this.targetY = random(100, canvas.height / 2);
+    this.speed = random(4, 6);
+    this.exploded = false;
+  }
+  update() {
+    this.y -= this.speed;
+    if (this.y <= this.targetY && !this.exploded) {
+      this.exploded = true;
+      explode(this.x, this.y);
+    }
+  }
+  draw() {
+    ctx.fillStyle = "white";
+    ctx.fillRect(this.x, this.y, 2, 10);
+  }
+}
+
+class Particle {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.radius = random(1, 3);
+    this.speedX = random(-4, 4);
+    this.speedY = random(-4, 4);
+    this.life = 100;
+    this.color = `hsl(${random(0, 360)},100%,60%)`;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.life--;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  }
+}
+
+function explode(x, y) {
+  for (let i = 0; i < 70; i++) particles.push(new Particle(x, y));
+}
+
+function animate() {
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (Math.random() < 0.05) fireworks.push(new Firework());
+
+  fireworks.forEach((fw, i) => {
+    fw.update();
+    fw.draw();
+    if (fw.exploded) fireworks.splice(i, 1);
+  });
+
+  particles.forEach((p, i) => {
+    p.update();
+    p.draw();
+    if (p.life <= 0) particles.splice(i, 1);
+  });
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ================= TEXTO SECUENCIAL EN LOOP ================= */
+const words = ["happy", "new", "year", "y2026"];
+const elements = words.map(id => document.getElementById(id));
+const byYoha = document.getElementById("byYoha");
+
+function resetText() {
+  elements.forEach(el => el.style.display = "none");
+  byYoha.style.display = "none";
+}
+
+function playSequence() {
+  resetText();
+  setTimeout(() => elements[0].style.display = "block", 500);
+  setTimeout(() => elements[1].style.display = "block", 1500);
+  setTimeout(() => elements[2].style.display = "block", 2500);
+  setTimeout(() => elements[3].style.display = "block", 3500);
+  setTimeout(() => byYoha.style.display = "block", 5200);
+}
+
+/* repetir automáticamente */
+playSequence();
+setInterval(playSequence, 9000);
+
+/* ================= MÚSICA ================= */
+const music = document.getElementById("music");
+document.body.addEventListener("click", () => {
+  music.play();
+  document.querySelector(".tap").style.display = "none";
+}, { once: true });
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
